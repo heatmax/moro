@@ -1,11 +1,15 @@
-package org.codeandmagic.android.asmack_test;
+package com.heatclub.frauder;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
+//import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.AndFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -15,6 +19,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Message;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,19 +43,9 @@ public class MyService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
-		mXmppConnection = new XMPPConnection(DOMAIN);
-		try {
-			mXmppConnection.connect();
-			mXmppConnection.login(USERNAME, PASSWORD);
-		}
-		catch (final XMPPException e) {
-			Log.e(TAG, "Could not connect to Xmpp server.", e);
-			Toast.makeText(getBaseContext(), "Could not connect to Xmpp server."
-						   , Toast.LENGTH_SHORT).show();
-			return;
-		}
-
+	//	connect();
+		new Thread(rConnection).start(); 		
+/*
 		if (!mXmppConnection.isConnected()) {
 			Log.e(TAG, "Could not connect to the Xmpp server.");
 			Toast.makeText(getBaseContext(), "Could not connect to Xmpp server."
@@ -114,7 +109,72 @@ public class MyService extends Service {
 		});
 */
 	}
+	
+	Runnable rConnection = new Runnable(){
 
+		@Override
+		public void run()
+		{
+			ConnectionConfiguration config = new ConnectionConfiguration("jabber.ru", 5222, "jabber.ru"); 	
+			SASLAuthentication.supportSASLMechanism("PLAIN", 0);
+			
+			mXmppConnection = new XMPPConnection(config);
+			try {
+				mXmppConnection.connect();
+				mXmppConnection.login(USERNAME, PASSWORD);
+			}
+			catch (final XMPPException e) {
+				Log.e(TAG, "Could not connect to Xmpp server.", e);
+		//		Toast.makeText(getBaseContext(), "Could not connect to Xmpp server."
+		//					   , Toast.LENGTH_SHORT).show();
+				return;
+			}
+			catch (final Exception e) {
+				Log.e(TAG, "-------Could not connect to Xmpp server.", e);
+		//		Toast.makeText(getApplicationContext(), "Could not connect to Xmpp server."
+		//					   , Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if (!mXmppConnection.isConnected()) {
+				Log.e(TAG, "------Could not connect to the Xmpp server.");
+		//		Toast.makeText(getBaseContext(), "Could not connect to Xmpp server."
+		//					   , Toast.LENGTH_SHORT).show();
+
+				return;
+			}
+
+			Log.i(TAG, "--------Yey! We're connected to the Xmpp server!");
+	//		Toast.makeText(getApplicationContext(), "Yey! We're connected to the Xmpp server!"
+	//					   , Toast.LENGTH_SHORT).show();
+			sendMessage("Service is start");
+			
+					
+		}
+
+	};
+	
+	public void sendMessage(String msg){
+		
+		ChatManager mChat = mXmppConnection.getChatManager();
+		Chat chat = mChat.createChat("frauder_admin@jabber.ru", new MessageListener(){
+				public void processMessage(Chat chat, Message message) {
+					System.out.println("Received message: " + message);
+				}
+			});
+
+		try{
+			chat.sendMessage(msg);
+		}
+		catch(XMPPException e){
+	//		Toast.makeText(getBaseContext(), "ERRROR Send message"
+	//					   , Toast.LENGTH_SHORT).show();
+
+		}
+
+		
+	}
+	
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		return Service.START_NOT_STICKY;
@@ -128,7 +188,7 @@ public class MyService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		mXmppConnection.disconnect();
+	//	mXmppConnection.disconnect();
 	}
 
 	private class MyMessageListener implements MessageListener {
@@ -138,8 +198,8 @@ public class MyService extends Service {
 			String msg;
 	//		msg = "Xmpp message received: '" + message.getBody() + "' on thread: " + getThreadSignature();
 	//		Log.i(TAG, "Xmpp message received: '" + message.getBody() + "' on thread: " + getThreadSignature());
-			Toast.makeText(getBaseContext(), "Xmpp message received" 
-						   , Toast.LENGTH_SHORT).show();
+	//		Toast.makeText(getBaseContext(), "Xmpp message received" 
+	//					   , Toast.LENGTH_SHORT).show();
 			
 			// --> this is another thread ('Smack Listener Processor') not the
 			// main thread!

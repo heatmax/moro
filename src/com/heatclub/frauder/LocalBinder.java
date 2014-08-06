@@ -1,4 +1,4 @@
-package org.codeandmagic.android.asmack_test;
+package com.heatclub.frauder;
 
 import java.lang.ref.WeakReference;
 

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.codeandmagic.android.asmack_test"
+    package="com.heatclub.frauder"
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="9" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-sdk 
+        android:minSdkVersion="9" 
+        android:targetSdkVersion="11" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -20,8 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service android:name=".MyService" />
+		<service android:name=".MyService" />
     </application>
-
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
+	
 </manifest>
