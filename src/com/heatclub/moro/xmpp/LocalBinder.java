@@ -1,4 +1,4 @@
-package com.heatclub.frauder;
+package com.heatclub.moro.xmpp;
 
 import java.lang.ref.WeakReference;
 
