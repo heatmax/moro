@@ -1,0 +1,63 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Параметры исходящих вызовов">
+         <EditTextPreference
+            android:key="@string/defaultDelayAutoCall"
+            android:title="Интервал между вызовами"
+            android:defaultValue="9"
+            android:dialogTitle="Введите интервал (сек.)"/>
+		<EditTextPreference
+            android:key="@string/defaultCallTime"
+            android:title="Длительность вызова"
+            android:defaultValue="9"
+            android:dialogTitle="Введите длительность вызова(сек.)"/>	
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Параметры входящих вызовов">
+		<CheckBoxPreference
+			android:key="isAutoAnswerStart"
+			android:defaultValue="true"		
+			android:summaryOn="выключить"
+			android:summaryOff="включить"
+			android:title="Автоответчик">
+		</CheckBoxPreference>
+		<EditTextPreference
+            android:key="@string/defaultDelayAutoAnswer"
+            android:title="Задержка перед автоподъемом"
+            android:defaultValue="0"
+            android:dialogTitle="Введите задержку (сек.)"/>
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Настройка номеров">			
+		<ListPreference
+			android:entries="@array/methodNumberGeneration"
+			android:entryValues="@array/methodNumberGeneration_values"
+			android:defaultValue="1"		
+			android:key="listMethod"
+			android:summary="Выберите из списка"
+			android:title="Источник номеров">
+		</ListPreference>
+		<PreferenceScreen
+			android:key="manualNumber"
+			android:dependency="listMethod"
+			android:summary="Настройки ручного ввода номеров телефона"
+			android:title="Редактировать ручной ввод">
+			<CheckBoxPreference
+				android:key="@string/isRandomManualNumber"
+				android:summary="Использовать номера  случайном порядке"
+				android:title="Случайно">
+			</CheckBoxPreference>
+			<CheckBoxPreference
+				android:key="@string/isRepeatManualNumber"
+				android:defaultValue="true"		
+				android:summary="Использовать номера повторно"
+				android:title="Повтрять">
+			</CheckBoxPreference>
+			<EditTextPreference
+				android:key="@string/defaultPrefix"
+				android:title="Номера дозвона"
+				android:summary="Ввод номеров дозвона через Enter"
+				android:defaultValue="@string/defaultPrefix"
+				android:dialogTitle="Введите номера либо маски (Например 111, +38067ххххххх)"/>	
+		</PreferenceScreen>		
+	</PreferenceCategory>
+ 
+</PreferenceScreen>

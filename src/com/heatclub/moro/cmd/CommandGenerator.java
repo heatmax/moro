@@ -7,6 +7,9 @@ import java.util.HashMap;
 //import java.lang.app
 
 import com.heatclub.moro.MainActivity;
+import com.heatclub.moro.xmpp.XMPPService;
+import com.heatclub.moro.telephony.CallService;
+
 
 public class CommandGenerator
 {
@@ -24,43 +27,50 @@ public class CommandGenerator
 		fillExecutorMap();
 	}
 
-	public CommandGenerator(Intent intent){
+	public CommandGenerator(Intent intent) throws Exception{
+		if(!isCommandIntent(intent))
+			throw new Exception("This is not command intent in constructor of CommandGenerator");
+	//	converteIntent(intent);
+			
 		setCommandIntent(intent);
 		fillExecutorMap();
+			
 	}
+	
+	private Intent converteIntent(Intent intent){
+		fillExecutorMap();		
+		return new Intent(ACTION);
+	}
+	
 	
 	private void fillExecutorMap(){
 		executorMap.put("main", MainActivity.class);
-	//	executorTypeMap.put("main", EXECUTOR_TYPE_ACTIVITY);	
+		executorMap.put("xmpp", XMPPService.class);
+		executorMap.put("tel", CallService.class);		
 	}
 	
 
-	public boolean setCommandIntent(Intent intent){
-		if(isCommandIntent(intent)){
+	public void setCommandIntent(Intent intent){
 			this.intent = intent;	
-			return true;
-		}
-		else
-			return false;
 	}
 	
-	
+/*	
 	public boolean isCommandIntent(Intent intent){
 		if(checkCommandIntent(intent))		
 			return true;	
 		else
 			return false;
 	}
-	
+/*	
 	private boolean checkCommandIntent(Intent intent){
 		return true;
 	}
-		
+*/		
 	public Intent getCommandIntent(){
 		return this.intent; 	
 	}
 	
-	public Intent createCommandIntent(Message msg){
+	public Intent getCommandIntent(Message msg){
 		fillIntentFromXMPPMessage(msg);
 		return getCommandIntent();
 	}
@@ -147,23 +157,44 @@ public class CommandGenerator
 	public String getFrom(){
 		return this.intent.getStringExtra("From");
 	}
+	
+	public String getFrom(Intent tIntent){
+		return tIntent.getStringExtra("From");
+	}
+	
 
 	public String getTo(){
 		return this.intent.getStringExtra("To");
 	}
-
+	
+	public String getTo(Intent tIntent){
+		return tIntent.getStringExtra("To");
+	}
+	
 	public String getAuthor(){
 		return this.intent.getStringExtra("Author");
 	}
-
+	
+	public String getAuthor(Intent tIntent){
+		return tIntent.getStringExtra("Author");
+	}
+	
 	public String getCommandName(){
 		return this.intent.getStringExtra("Command");		
 	}
-
+	
+	public String getCommandName(Intent tIntent){
+		return tIntent.getStringExtra("Command");		
+	}
+	
 	public String[] getArgs(){
 		return this.intent.getStringArrayExtra("Args");
 	}
 
+	public String[] getArgs(Intent tIntent){
+		return tIntent.getStringArrayExtra("Args");
+	}
+	
 	public String getArg(int i){
 		String[] result = this.intent.getStringArrayExtra("Args");
 		if(result != null)
@@ -171,40 +202,67 @@ public class CommandGenerator
 				return result[i];
 		return null;
 	}
-
+	
+	public String getArg(int i, Intent tIntent){
+		String[] result = tIntent.getStringArrayExtra("Args");
+		if(result != null)
+			if(result.length > i)
+				return result[i];
+		return null;
+	}
+	
+	public Class getExecutorClass(String exName){
+		Class cls = executorMap.get(exName);		
+		if(cls == null)
+			return null;
+		return cls;
+	}
+	
+	public Class getExecutorClass(Intent tIntent){
+		Class cls = executorMap.get(getTo(tIntent));		
+		if(cls == null)
+			return null;
+		return cls;
+	}
+	
 	public Class getExecutorClass(){
 		Class cls = executorMap.get(getTo());		
 		if(cls == null)
 			return null;
 		return cls;
-	//	return "MainActivity";
 	}
 	
 	public int getExecutorClassType(){
+		return getExecutorClassType(this.intent);
+	}	
+	
+	public int getExecutorClassType(Intent tIntent){
 		String activity = "android.app.Activity";
 		String service = "android.app.Service";
-
-		if(!isCommandeMoro())
+		
+		if(!isCommandIntent(tIntent))
 			return EXECUTOR_TYPE_UKNOWN;	
-		if(executorMap.get(getTo()).getSuperclass().getName().equals(activity))
+		if(executorMap.get(getTo(tIntent)).getSuperclass().getName().equals(activity))
 			return EXECUTOR_TYPE_ACTIVITY;
-		if(executorMap.get(getTo()).getSuperclass().getName().equals(service))
-			return EXECUTOR_TYPE_ACTIVITY;
+		if(executorMap.get(getTo(tIntent)).getSuperclass().getName().equals(service))
+			return EXECUTOR_TYPE_SERVICE;
 		
 		return EXECUTOR_TYPE_UKNOWN;
 		
 	}
 	
-	public boolean isCommandeMoro(){
-		if(getExecutorClass() == null)
+	public boolean isCommandIntent(Intent tIntent){
+		if(tIntent == null)
 			return false;
-		if(!intent.getAction().equals(ACTION))
+		if(getTo(tIntent) == null)
+			return false;		
+		if(getExecutorClass(tIntent) == null)
 			return false;
-	//	if(getTo() == null)
-	//		return false;
-		if(getFrom() == null)
+		if(!tIntent.getAction().equals(ACTION))
 			return false;
-		if(getAuthor() == null)
+		if(getFrom(tIntent) == null)
+			return false;
+		if(getAuthor(tIntent) == null)
 			return false;
 		return true;	
 	}

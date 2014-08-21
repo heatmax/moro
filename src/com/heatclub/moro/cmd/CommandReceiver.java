@@ -1,15 +1,13 @@
-package com.heatclub.moro;
+package com.heatclub.moro.cmd;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.widget.Toast;
-import com.heatclub.moro.cmd.Command;
-import com.heatclub.moro.cmd.CommandGenerator;
-
-
-
+//import com.heatclub.moro.cmd.Command;
+//import com.heatclub.moro.cmd.CommandGenerator;
+import com.heatclub.moro.xmpp.XMPPService;
 
 public class CommandReceiver extends BroadcastReceiver{
 
@@ -23,12 +21,14 @@ public class CommandReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
-		if (intent.getAction().equals(ACTION_TYPE)) {
-			CommandGenerator cmd = new CommandGenerator(intent);
-	/*		
-			Toast.makeText(context, "Exe name: "+cmd.getExecutorClass()+"\n Exe type: "+cmd.getExecutorClassType(),
+		if (intent.getAction().equals(ACTION_TYPE)){
+			CommandGenerator cmd = new CommandGenerator();		
+			if(cmd.isCommandIntent(intent)){
+				cmd.setCommandIntent(intent);
+				
+			Toast.makeText(context, "Command: "+cmd.getCommandName()+"\n To: "+cmd.getTo()+"\n From: "+cmd.getFrom(),
 						   Toast.LENGTH_LONG).show();	
-	*/		
+		
 			switch(cmd.getExecutorClassType()){
 				case CommandGenerator.EXECUTOR_TYPE_ACTIVITY:
 					if(cmd.getExecutorClass() != null){
@@ -44,7 +44,8 @@ public class CommandReceiver extends BroadcastReceiver{
 						context.startService(intent);  	
 					}				
 					break;
-			}		
+			}
+			}
 		}
 	}
 }

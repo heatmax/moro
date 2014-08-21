@@ -1,5 +1,6 @@
 package com.heatclub.moro.xmpp;
 
+import java.lang.reflect.Method;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -26,6 +27,7 @@ public class XMPPService extends Service {
 	private static String server = "jabber.ru";
 	
 	private static final String TAG = "moro";
+	private CommandGenerator cmd;
 	
 	@Override
 	public IBinder onBind(final Intent intent) {
@@ -33,42 +35,24 @@ public class XMPPService extends Service {
 	}
 
 	@Override
-	public void onCreate() {
-		super.onCreate();
+	public void onCreate() {		
+		super.onCreate();		
+		cmd = new CommandGenerator();		
 		xp = new XMPPProvider(domain, port, server);		
 		xp.setListener(new stateListener());
-	//	System.exit(0);
-		xp.connect(username, password);	
-/*		
-		xp.sendMessage("test1", "frauder_admin@jabber.ru");	
-		xp.sendMessage("test2", "frauder_admin@jabber.ru");	
-//		xp.processSending(0);
-		xp.sendMessage("test3", "frauder_admin@jabber.ru");	
-		xp.sendMessage("test4", "frauder_admin@jabber.ru");	
-//		xp.processSending(1);
-/*		xp.sendMessage("test5", "frauder_admin@jabber.ru");	
-		xp.sendMessage("test6", "frauder_admin@jabber.ru");	
-		xp.sendMessage("test7", "frauder_admin@jabber.ru");	
-		//Log.d("MORO", xp.readMessage());
-//		xp.connect(domain, port, server);
-/*		nm.sendMessage("test2", "frauder_admin@jabber.ru");		
-		nm.login("frauder_cl1", "mainkey7");
-		nm.sendMessage("test3", "frauder_admin@jabber.ru");
-//		nm.disconnect();
-//		nm.createChat("frauder_admin@jabber.ru");
-	//	nm.sendMessage("test4", "frauder_admin@jabber.ru");
-*/
 	}
 	
 	
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
-	
-	//	nm.connect();
-//		nm.sendMessage("command1", "frauder_admin@jabber.ru");
-//		nm.sendMessage("command2", "frauder_admin@jabber.ru");
-	//	nm.sendMessage("command3", "frauder_cl1@jabber.ru");
-		
+		cmd.setCommandIntent(intent);
+		String command = cmd.getCommandName();
+		if(command.equals("start"))
+			xp.connect(username, password);	
+		else
+		if(command.equals("stop"))
+			this.stopSelf();
+
 		return Service.START_NOT_STICKY;
 	}
 
@@ -88,6 +72,32 @@ public class XMPPService extends Service {
 		return new StringBuilder(t.getName()).append("[id=").append(t.getId()).append(", priority=")
 				.append(t.getPriority()).append("]").toString();
 	}
+	
+	private void processCommand(){
+		try{
+		Class c = this.getClass(); 
+		Class[] paramTypes = new Class[] { String.class, int.class }; 
+		Method method = c.getMethod("getCalculateRating", paramTypes); 
+		Object[] args = new Object[] { new String("First Calculate"), new Integer(10) }; 
+		Double d = (Double) method.invoke(this, args); 	
+		}
+		catch(Exception e){
+			
+		}
+	/*
+		Class c =this.getClass();	
+		Method[] methods = c.getMethods(); 
+		for (Method method : methods) { 
+			System.out.println("Имя: " + method.getName()); 
+			System.out.println("Возвращаемый тип: " + method.getReturnType().getName()); 
+			Class[] paramTypes = method.getParameterTypes(); 
+			System.out.print("Типы параметров: "); 
+			for (Class paramType : paramTypes) { 
+				System.out.print(" " + paramType.getName()); 
+			} 
+			System.out.println(); 
+		} 
+*/	}
 
 	class stateListener extends XMPPStateListener{
 		
@@ -108,8 +118,9 @@ public class XMPPService extends Service {
 					try{
 				//		Log.d(TAG, "command: "+CommandGenerator.getDefault(message));
 						CommandGenerator cmd = new CommandGenerator();
-						cmd.createCommandIntent(message);
-						sendBroadcast(cmd.getCommandIntent());
+					//	cmd.createCommandIntent(message);
+						sendBroadcast(cmd.getCommandIntent(message));
+			
 					//	String msg = "command: "+"\n"+cmd.getAuthor()+"\n"+cmd.getFrom()+"\n"+cmd.getTo()+"\n"+cmd.getCommand()+"\n"+cmd.getArgs(1);
 					//	msg = "command: " + msg;// + "' on thread: " + getThreadSignature();
 					//	xp.sendMessage(msg, message.getFrom());
